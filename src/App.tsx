@@ -5,7 +5,7 @@ import { Soundfont } from "smplr";
 
 export enum GROUPS {
   piano = "electric_piano_1",
-  trumpet = "trumpet",
+  alto_sax = "alto_sax",
   marimba = "marimba",
 }
 
