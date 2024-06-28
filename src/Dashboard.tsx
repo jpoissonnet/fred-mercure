@@ -54,14 +54,16 @@ const Dashboard = () => {
       })}
       <Piano
         noteRange={{ first: firstNote, last: lastNote }}
-        playNote={(midiNumber) => {
+        playNote={(midiNumber: number) => {
+          console.log(MidiNumbers.getAttributes(midiNumber).note);
           // Play a given note - see notes below
           sendPayload(
             { note: MidiNumbers.getAttributes(midiNumber).note },
             selectedGroup,
           );
         }}
-        stopNote={(midiNumber) => {
+        stopNote={(midiNumber: number) => {
+          console.log(MidiNumbers.getAttributes(midiNumber).note);
           // Stop playing a given note - see notes below
         }}
         width={1000}
