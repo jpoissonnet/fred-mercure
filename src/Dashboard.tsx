@@ -1,5 +1,6 @@
 import { GROUPS } from "./App.tsx";
 import { useState } from "react";
+// @ts-ignore
 import { Piano, KeyboardShortcuts, MidiNumbers } from "react-piano";
 import "react-piano/dist/styles.css";
 
