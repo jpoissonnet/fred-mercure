@@ -1,7 +1,7 @@
 import "./App.css";
 import { useEffect, useRef, useState } from "react";
 import { Payload } from "./Dashboard.tsx";
-import * as Tone from "tone";
+import { SplendidGrandPiano } from "smplr";
 
 export enum GROUPS {
   TRUMPET,
@@ -10,14 +10,17 @@ export enum GROUPS {
   BASS,
 }
 
-const url = new URL("https://localhost/.well-known/mercure");
+const url = new URL("http://mercure.frommelt.fr/.well-known/mercure");
 
 function App() {
   const [group, setGroup] = useState<GROUPS | null>(null);
   const [message, setMessage] = useState<Payload | null>(null);
-  const synthRef = useRef(new Tone.Synth().toDestination());
+  const context = useRef<any>();
+  const piano = useRef<any>();
 
   useEffect(() => {
+    context.current = new AudioContext();
+    piano.current = new SplendidGrandPiano(context.current);
     const group = GROUPS[
       Math.floor((Math.random() * Object.keys(GROUPS).length) / 2)
     ] as unknown as GROUPS;
@@ -29,24 +32,18 @@ function App() {
     eventSource.onmessage = (e) => {
       const data = JSON.parse(e.data);
       setMessage(data);
+      console.log(data);
     };
+
     return () => {
       eventSource.close();
-      synthRef.current.triggerRelease(Tone.now());
-      synthRef.current.dispose();
     };
   }, []);
 
   useEffect(() => {
     if (message) {
-      try {
-        new Tone.Clock((time) => {
-          synthRef.current.triggerAttackRelease(message.note, "2n", time);
-        }).start();
-      } catch (e) {
-        console.error(e);
-      }
-      synthRef.current.setNote(message.note);
+      console.log("Playing", message.note);
+      piano.current.start(message.note);
     }
   }, [message]);
 
@@ -56,10 +53,13 @@ function App() {
       <p>Currently playing {message?.note ?? "nothing"}</p>
       <button
         onClick={() => {
-          synthRef.current.triggerRelease(Tone.now());
+          context.current.resume();
         }}
       >
-        Stop
+        Catch focus
+      </button>
+      <button onClick={() => piano.current.start(message?.note ?? "C3")}>
+        Play {message?.note ?? "C3"}
       </button>
     </>
   );

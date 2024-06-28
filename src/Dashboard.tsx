@@ -1,12 +1,14 @@
 import { GROUPS } from "./App.tsx";
 import { useState } from "react";
+import { Piano, KeyboardShortcuts, MidiNumbers } from "react-piano";
+import "react-piano/dist/styles.css";
 
 export interface Payload {
   note: string;
 }
 
 const sendPayload = (payload: Payload, group: keyof typeof GROUPS) =>
-  fetch("https://localhost/.well-known/mercure", {
+  fetch(`http://mercure.frommelt.fr/.well-known/mercure`, {
     method: "POST",
     headers: {
       "Content-Type": "application/x-www-form-urlencoded",
@@ -20,11 +22,15 @@ const sendPayload = (payload: Payload, group: keyof typeof GROUPS) =>
   });
 
 const Dashboard = () => {
-  const [inputs, setInputs] = useState<Record<keyof typeof GROUPS, Payload>>({
-    TRUMPET: { note: "C3" },
-    SAXOPHONE: { note: "G3" },
-    DRUMS: { note: "E3" },
-    BASS: { note: "C2" },
+  const [selectedGroup, setSelectedGroup] =
+    useState<keyof typeof GROUPS>("TRUMPET");
+
+  const firstNote = MidiNumbers.fromNote("c3");
+  const lastNote = MidiNumbers.fromNote("f5");
+  const keyboardShortcuts = KeyboardShortcuts.create({
+    firstNote: firstNote,
+    lastNote: lastNote,
+    keyboardConfig: KeyboardShortcuts.HOME_ROW,
   });
 
   return (
@@ -36,22 +42,30 @@ const Dashboard = () => {
           <label key={group} htmlFor={group}>
             <p>{group.toLowerCase()}</p>
             <input
-              type="text"
+              type="radio"
+              name="group"
               id={group}
-              value={inputs[group]?.note}
-              onChange={(e) =>
-                setInputs({
-                  ...inputs,
-                  [group]: { ...inputs[group], note: e.target.value },
-                })
-              }
+              checked={selectedGroup === group}
+              onChange={() => setSelectedGroup(group)}
             />
-            <button onClick={() => sendPayload(inputs[group] ?? {}, group)}>
-              Send
-            </button>
           </label>
         );
       })}
+      <Piano
+        noteRange={{ first: firstNote, last: lastNote }}
+        playNote={(midiNumber) => {
+          // Play a given note - see notes below
+          sendPayload(
+            { note: MidiNumbers.getAttributes(midiNumber).note },
+            selectedGroup,
+          );
+        }}
+        stopNote={(midiNumber) => {
+          // Stop playing a given note - see notes below
+        }}
+        width={1000}
+        keyboardShortcuts={keyboardShortcuts}
+      />
     </div>
   );
 };
