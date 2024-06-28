@@ -1,6 +1,7 @@
 import "./App.css";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Payload } from "./Dashboard.tsx";
+import * as Tone from "tone";
 
 export enum GROUPS {
   TRUMPET,
@@ -9,33 +10,57 @@ export enum GROUPS {
   BASS,
 }
 
+const url = new URL("https://localhost/.well-known/mercure");
+
 function App() {
   const [group, setGroup] = useState<GROUPS | null>(null);
   const [message, setMessage] = useState<Payload | null>(null);
+  const synthRef = useRef(new Tone.Synth().toDestination());
 
   useEffect(() => {
-    const url = new URL("https://localhost/.well-known/mercure");
     const group = GROUPS[
       Math.floor((Math.random() * Object.keys(GROUPS).length) / 2)
     ] as unknown as GROUPS;
     setGroup(group);
-    url.searchParams.append("topic", `https://fred-mercure.com/group/${group}`); //TODO: make this dynamic
+    url.searchParams.append("topic", `https://fred-mercure.com/group/${group}`);
 
     const eventSource = new EventSource(url);
+
     eventSource.onmessage = (e) => {
       const data = JSON.parse(e.data);
       setMessage(data);
-      console.log(e);
     };
     return () => {
       eventSource.close();
+      synthRef.current.triggerRelease(Tone.now());
+      synthRef.current.dispose();
     };
   }, []);
+
+  useEffect(() => {
+    if (message) {
+      try {
+        new Tone.Clock((time) => {
+          synthRef.current.triggerAttackRelease(message.note, "2n", time);
+        }).start();
+      } catch (e) {
+        console.error(e);
+      }
+      synthRef.current.setNote(message.note);
+    }
+  }, [message]);
 
   return (
     <>
       <h1>You are a musician of the group {group}</h1>
       <p>Currently playing {message?.note ?? "nothing"}</p>
+      <button
+        onClick={() => {
+          synthRef.current.triggerRelease(Tone.now());
+        }}
+      >
+        Stop
+      </button>
     </>
   );
 }

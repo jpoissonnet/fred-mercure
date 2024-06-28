@@ -20,9 +20,12 @@ const sendPayload = (payload: Payload, group: keyof typeof GROUPS) =>
   });
 
 const Dashboard = () => {
-  const [inputs, setInputs] = useState<Record<keyof typeof GROUPS, Payload>>(
-    {} as Record<keyof typeof GROUPS, Payload>,
-  );
+  const [inputs, setInputs] = useState<Record<keyof typeof GROUPS, Payload>>({
+    TRUMPET: { note: "C3" },
+    SAXOPHONE: { note: "G3" },
+    DRUMS: { note: "E3" },
+    BASS: { note: "C2" },
+  });
 
   return (
     <div>
@@ -35,6 +38,7 @@ const Dashboard = () => {
             <input
               type="text"
               id={group}
+              value={inputs[group]?.note}
               onChange={(e) =>
                 setInputs({
                   ...inputs,
