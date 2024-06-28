@@ -1,7 +1,7 @@
 import "./App.css";
 import { useEffect, useRef, useState } from "react";
 import { Payload } from "./Dashboard.tsx";
-import { Soundfont } from "smplr";
+import { Reverb, Soundfont } from "smplr";
 
 export enum GROUPS {
   piano = "electric_piano_1",
@@ -16,12 +16,18 @@ function App() {
   const [message, setMessage] = useState<Payload | null>(null);
   const context = useRef<any>();
   const piano = useRef<any>();
+  const [isClicked, setIsClicked] = useState(false);
 
   useEffect(() => {
     context.current = new AudioContext();
     const randomGroup = Math.floor(Math.random() * 3);
     const group = Object.values(GROUPS)[randomGroup] as GROUPS;
-    piano.current = new Soundfont(context.current, { instrument: group });
+    piano.current = new Soundfont(context.current, {
+      instrument: group,
+      decayTime: 0.5,
+    });
+    piano.current.output.addEffect("reverb", new Reverb(context.current), 1);
+
     setGroup(group);
     url.searchParams.append("topic", `https://fred-mercure.com/play`);
 
@@ -47,15 +53,18 @@ function App() {
 
   return (
     <>
-      <h1>You are a musician of the group {group}</h1>
+      <h1>You are a musician 🧑‍🎤</h1>
       <p>Currently playing {message?.note ?? "nothing"}</p>
-      <button
-        onClick={() => {
-          context.current.resume();
-        }}
-      >
-        Catch focus
-      </button>
+      {!isClicked && (
+        <button
+          onClick={() => {
+            context.current.resume();
+            setIsClicked(true);
+          }}
+        >
+          Join the band with my {group}
+        </button>
+      )}
       <button onClick={() => piano.current.start(message?.note ?? "C3")}>
         Play {message?.note ?? "C3"}
       </button>
