@@ -10,7 +10,7 @@ export enum GROUPS {
   BASS,
 }
 
-const url = new URL("http://mercure.frommelt.fr/.well-known/mercure");
+const url = new URL("https://mercure.frommelt.fr/.well-known/mercure");
 
 function App() {
   const [group, setGroup] = useState<GROUPS | null>(null);

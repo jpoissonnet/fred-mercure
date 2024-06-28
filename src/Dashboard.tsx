@@ -9,7 +9,7 @@ export interface Payload {
 }
 
 const sendPayload = (payload: Payload, group: keyof typeof GROUPS) =>
-  fetch(`http://mercure.frommelt.fr/.well-known/mercure`, {
+  fetch(`https://mercure.frommelt.fr/.well-known/mercure`, {
     method: "POST",
     headers: {
       "Content-Type": "application/x-www-form-urlencoded",
