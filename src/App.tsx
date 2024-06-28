@@ -1,13 +1,12 @@
 import "./App.css";
 import { useEffect, useRef, useState } from "react";
 import { Payload } from "./Dashboard.tsx";
-import { SplendidGrandPiano } from "smplr";
+import { Soundfont } from "smplr";
 
 export enum GROUPS {
-  TRUMPET,
-  SAXOPHONE,
-  DRUMS,
-  BASS,
+  piano = "electric_piano_1",
+  trumpet = "trumpet",
+  marimba = "marimba",
 }
 
 const url = new URL("https://mercure.frommelt.fr/.well-known/mercure");
@@ -20,12 +19,11 @@ function App() {
 
   useEffect(() => {
     context.current = new AudioContext();
-    piano.current = new SplendidGrandPiano(context.current);
-    const group = GROUPS[
-      Math.floor((Math.random() * Object.keys(GROUPS).length) / 2)
-    ] as unknown as GROUPS;
+    const randomGroup = Math.floor(Math.random() * 3);
+    const group = Object.values(GROUPS)[randomGroup] as GROUPS;
+    piano.current = new Soundfont(context.current, { instrument: group });
     setGroup(group);
-    url.searchParams.append("topic", `https://fred-mercure.com/group/${group}`);
+    url.searchParams.append("topic", `https://fred-mercure.com/play`);
 
     const eventSource = new EventSource(url);
 
