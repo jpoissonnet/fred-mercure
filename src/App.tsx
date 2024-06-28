@@ -2,6 +2,7 @@ import "./App.css";
 import { useEffect, useRef, useState } from "react";
 import { Payload } from "./Dashboard.tsx";
 import { SplendidGrandPiano } from "smplr";
+import { Link } from "react-router-dom";
 
 export enum GROUPS {
   TRUMPET,
@@ -49,6 +50,9 @@ function App() {
 
   return (
     <>
+      <section>
+        <Link to={"/remote"}>Navigate to remote</Link>
+      </section>
       <h1>You are a musician of the group {group}</h1>
       <p>Currently playing {message?.note ?? "nothing"}</p>
       <button
